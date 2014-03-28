@@ -127,8 +127,7 @@ sub _build_dsn
 
   my $dsn = "DBI:$type:";
 
-  no warnings 'experimental';
-
+  no warnings;
   for ($type)
   {
     when ('SQLite')
