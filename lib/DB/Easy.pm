@@ -112,6 +112,7 @@ has 'dbh' =>
 (
   is => 'lazy',
 );
+
 has 'sql' =>
 (
   is => 'lazy',
@@ -162,6 +163,16 @@ sub _build_sql
   return SQL::Abstract->new();
 }
 
+sub _ensure_db
+{
+  my ($self) = @_;
+  if (!$self->dbh->ping)
+  {
+    $self->{dbh} = $self->dbh->clone()
+      or croak "Could not connect to database.";
+  }
+}
+
 ## private method DESTROY
 ## called when object is destroyed.
 
@@ -194,6 +205,7 @@ Recognized options:
 sub select
 {
   my ($self, $table, %opts) = @_;
+
   my $where  = getarg(\%opts, 'where'   );
   my $order  = getarg(\%opts, 'order'   );
   my $fields = getarg(\%opts, 'get', '*');
@@ -219,6 +231,7 @@ sub select
   }
   elsif (exists $opts{prepare} && $opts{prepare})
   {
+    $self->_ensure_db;
     return $self->dbh->prepare($stmt);
   }
 
@@ -321,6 +334,7 @@ Returns the DBI statement handler.
 sub execute
 {
   my ($self, $stmt, @bind) = @_;
+  $self->_ensure_db;
   my $sth = $self->dbh->prepare($stmt);
   $sth->execute(@bind);
   return $sth;
