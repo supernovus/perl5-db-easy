@@ -155,7 +155,7 @@ sub _build_dbh
 {
   my ($self) = @_;
   return DBI->connect($self->dsn, $self->user, $self->pass)
-    or croak "Could not connect to database.";
+    || croak "Could not connect to database.";
 }
 
 sub _build_sql
